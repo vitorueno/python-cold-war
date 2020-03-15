@@ -1,4 +1,4 @@
-# cold-war
+# Cold War
 A simple decision game created in a school project. Our main goal is to follow the historical facts and play with it, creating unexpected ends that may or may not have happened.
 
 # Authors
