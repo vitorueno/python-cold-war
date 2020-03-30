@@ -5,14 +5,21 @@ from .constants import *
 class Menu(arcade.View):
     def on_show(self):
         arcade.set_background_color(arcade.color.RED_DEVIL)
+        self.background = arcade.load_texture(BG_MENU)
 
     def on_draw(self):
         arcade.start_render()
-        arcade.draw_text("Menu Screen", SCREEN_WIDTH/2, SCREEN_HEIGHT/2,
-                         arcade.color.BLACK, font_size=50, anchor_x="center")
-        arcade.draw_text("Click to advance.", SCREEN_WIDTH/2, SCREEN_HEIGHT/2-75,
-                         arcade.color.GRAY, font_size=20, anchor_x="center")
-
+        #draw background
+        scale = SCREEN_WIDTH / self.background.width
+        arcade.draw_lrwh_rectangle_textured(0, 0,
+                                            SCREEN_WIDTH, SCREEN_HEIGHT,
+                                            self.background,0,255)
+        #draw text
+        arcade.draw_text("Menu Screen", SCREEN_WIDTH/2, SCREEN_HEIGHT/2 - 100,
+                         arcade.color.WHITE, font_size=50, anchor_x="center")
+        arcade.draw_text("Click to advance.", SCREEN_WIDTH/2, SCREEN_HEIGHT/2-175,
+                         arcade.color.WHITE, font_size=20, anchor_x="center")
+        
     def on_mouse_press(self, _x, _y, _button, _modifiers):
         choose_side = Choose_side()
         self.window.show_view(choose_side)
