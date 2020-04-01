@@ -3,6 +3,7 @@ SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 SCREEN_TITLE = 'Cold War'
 
+#fonts
 CHERNOBYL_FONT = 'app/fonts/Chernobyl.otf'
 OLD_FONT1 = 'app/fonts/OldNewspaperTypes.ttf'
 OLD_FONT2 = 'app/fonts/TravelingTypewriter.otf'
