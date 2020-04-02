@@ -24,6 +24,7 @@ We're students from "IFC Blumenau" in our last year of high school, where we als
     > python -m pip install venv
 * Activate the virtual environment
     > source VENV_NAME/bin/activate (Linux) 
+
     > "VENV_NAME/Scripts/activate" (Windows)
 * install the requirements:
     > pip install -r requirements.txt
