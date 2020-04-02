@@ -133,11 +133,11 @@ class Mission(arcade.View):
         if self.mission['destn1'] is not None:
             next_view1 = Mission(self.mission['destn1']) 
         else:
-            next_view1 = Newspaper()
+            next_view1 = Newspaper(self.mission['newspaper'])
         if self.mission['destn2'] is not None:
             next_view2 = Mission(self.mission['destn2']) 
         else:
-            next_view2 = Newspaper()
+            next_view2 = Newspaper(self.mission['newspaper'])
         
         self.button_list.append(Button(self, next_view1, SCREEN_WIDTH/2 - 280,
                                        40, 160, 40,self.mission['btn_name1'])) 
@@ -162,16 +162,33 @@ class Mission(arcade.View):
         
         
 class Newspaper(arcade.View):
+    def __init__(self,file_name):
+        super().__init__()
+        with open(f'{NEWSPAPER}/{file_name}',encoding='utf-8') as file:
+            self.newspaper = json.load(file)
+            
     def on_show(self):
         arcade.set_background_color(arcade.color.GRAY_BLUE)
-
+        self.background = arcade.load_texture(BG_NEWSPAPER)
+        self.astronaut = arcade.Sprite(ASTRONAUT,center_x=616,center_y=224)
+        self.button_list.append(Button(self, Menu(), 616,40,
+                                160, 40, 'Voltar ao Menu', 15, 
+                                highlight=arcade.color.DARK_GRAY,
+                                shadow=arcade.color.DARK_LIVER))
+        
     def on_draw(self):
         arcade.start_render()
-        arcade.draw_text('Newspaper', SCREEN_WIDTH/2, SCREEN_HEIGHT/2,
-                         arcade.color.BLACK, font_size=50, anchor_x='center')
-        arcade.draw_text('Click to advance.', SCREEN_WIDTH/2, SCREEN_HEIGHT/2-75,
-                         arcade.color.GRAY, font_size=20, anchor_x='center')
-
+        arcade.draw_lrwh_rectangle_textured(0, 0,SCREEN_WIDTH, SCREEN_HEIGHT,
+                                            self.background,0,255)
+        arcade.draw_text(self.newspaper['news_title'], 400, 419, arcade.color.BLACK,
+                        font_size=45, anchor_x='center',font_name=OLD_FONT1)
+        arcade.draw_text(self.newspaper['news_subtitle'], 220 , 337,arcade.color.BLACK,
+                        font_size=20, anchor_x='center',font_name=OLD_FONT1)
+        arcade.draw_text(self.newspaper['news_text'], 235, 273,arcade.color.GRAY,
+                        font_size=14, anchor_x='center',anchor_y='top',
+                        font_name=OLD_FONT2)
+        self.astronaut.draw()
+        super().on_draw()
+        
     def on_mouse_press(self, _x, _y, _button, _modifiers):
-        menu = Menu()
-        self.window.show_view(menu)
+        super().on_mouse_press(_x, _y, _button, _modifiers)
