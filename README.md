@@ -19,6 +19,7 @@ We're students from "IFC Blumenau" in our last year of high school, where we als
     > git clone https://github.com/vitorueno/cold-war
 * Open the repository and create a virtual environment with python:
     > cd cold-war
+
     > python -m venv VENV_NAME
 * If you don't have venv installed, run the following command:
     > python -m pip install venv
