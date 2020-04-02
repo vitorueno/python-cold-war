@@ -13,7 +13,17 @@ BG_MENU = 'app/img/background/menu.png'
 BG_CHOOSE_SIDE = 'app/img/background/choose_side.png'
 EUA_SIDE = 'app/img/background/eua.png'
 URSS_SIDE = 'app/img/background/urss.png'
-BTN_NORMAL = 'app/img/buttons/button_normal.png'
-BTN_HOVER = 'app/img/buttons/button_hover2.png'
-BTN_CLICKED = 'app/img/buttons/button_locked.png'
-BTN_LOCKED = 'app/img/buttons/button_locked.png'
+TOP_SECRET = 'app/img/background/top_secret.png'
+MISSIONS = "app/missions"
+NEWSPAPER = "app/newspapers"
+
+#text
+LOREM = '''
+Lorem ipsum dolor sit amet,
+consectetur adipiscing elit.
+Suspendisse a nisl quis elit gravida
+fermentum et nec justo. Vestibulum 
+volutpat euismod dictum. Ut non
+malesuada erat. Praesent lacinia
+pellentesque semper. Integer lacus
+'''
