@@ -16,20 +16,19 @@ We're students from "IFC Blumenau" in our last year of high school, where we als
 
 * Be sure you already have at least python 3.6 installed 
 * Clone the repository to your machine:
-    git clone https://github.com/vitorueno/cold-war
+    > git clone https://github.com/vitorueno/cold-war
 * Open the repository and create a virtual environment with python:
-    cd cold-war
-    python -m venv VENV_NAME
+    > cd cold-war
+    > python -m venv VENV_NAME
 * If you don't have venv installed, run the following command:
-    python -m pip install venv
+    > python -m pip install venv
 * Activate the virtual environment
-    source VENV_NAME/bin/activate (Linux) 
-                    or
-    "VENV_NAME/Scripts/activate" (Windows)
+    > source VENV_NAME/bin/activate (Linux) 
+    > "VENV_NAME/Scripts/activate" (Windows)
 * install the requirements:
-    pip install -r requirements.txt
+    > pip install -r requirements.txt
 * Run the play.py script:
-    python play.py
+    > python play.py
 
 ## License
 
