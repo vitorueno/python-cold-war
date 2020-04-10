@@ -1,5 +1,6 @@
 import arcade
-from app import Menu, Choose_side, Mission, Newspaper, constants as c
+from app import (Menu, Create_phase ,Choose_side, Mission, Newspaper,
+                constants as c)
 
 
 def main():

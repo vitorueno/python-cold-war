@@ -18,6 +18,7 @@ MISSIONS = 'app/missions'
 NEWSPAPER = 'app/newspapers'
 BG_NEWSPAPER = 'app/img/background/newspaper.png'
 ASTRONAUT = 'app/img/background/astronaut.png'
+BG_CREATE_PHASE = 'app/img/background/create_phase.png'
 
 #text
 LOREM = '''

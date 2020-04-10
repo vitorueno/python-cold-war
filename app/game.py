@@ -23,7 +23,6 @@ class Button(TextButton):
         if self.pressed:
             self.pressed = False
             self.view.window.show_view(self.next_view)
-            
 
 class QuitButton(TextButton):
     def __init__(self, view, x=0, y=0, width=100, height=40, 
@@ -44,7 +43,33 @@ class QuitButton(TextButton):
             self.pressed = False
             arcade.close_window()
 
+class Check_box(TextButton):
+    def __init__(self, view,other_checkbox, x=0, y=0, width=100, height=40, 
+                 color=arcade.color.WHITE,clicked=arcade.color.BLACK,
+                 text='',font_size=20,font_name=CHERNOBYL_FONT,
+                 font_color=arcade.color.WHITE):
+        
+        super().__init__(x, y, width, height,text,font_size,font_name,
+                         font_color,color,color,color)
+        self.view = view
+        self.color = color
+        self.clicked = clicked
+        self.other_checkbox = other_checkbox
 
+    def on_press(self):
+        if not self.other_checkbox.pressed: 
+            if self.pressed:
+                self.pressed = False
+                self.face_color = self.highlight_color = self.shadow_color = self.color
+            else:
+                self.pressed = True
+                
+    def on_release(self):
+        if not self.other_checkbox.pressed:
+            if self.pressed:
+                self.face_color = self.highlight_color = self.shadow_color = self.clicked
+                
+                
 class Menu(arcade.View):
     def on_show(self):
         arcade.set_background_color(arcade.color.RED_DEVIL)
@@ -54,12 +79,17 @@ class Menu(arcade.View):
     
     def set_buttons(self):
         self.button_list.append(Button(self, Choose_side(), SCREEN_WIDTH/2,
-                                SCREEN_HEIGHT/2 - 50, 110, 50, 'Jogar', 
+                                SCREEN_HEIGHT/2 - 20, 150, 50, 'Jogar', 
                                 highlight=arcade.color.DARK_GRAY,
                                 shadow=arcade.color.DARK_LIVER))
         
+        self.button_list.append(Button(self, Create_phase(), SCREEN_WIDTH/2,
+                                SCREEN_HEIGHT/2 - 120, 150, 50, 'Criar Fases', 
+                                16,highlight=arcade.color.DARK_GRAY,
+                                shadow=arcade.color.DARK_LIVER))
+        
         self.button_list.append(QuitButton(self, SCREEN_WIDTH/2,
-                                SCREEN_HEIGHT/2 - 150, 110, 50,
+                                SCREEN_HEIGHT/2 - 220, 150, 50,
                                 highlight=arcade.color.DARK_GRAY,
                                 shadow=arcade.color.DARK_LIVER))
             
@@ -68,8 +98,121 @@ class Menu(arcade.View):
         arcade.draw_lrwh_rectangle_textured(0, 0,SCREEN_WIDTH, SCREEN_HEIGHT,
                                             self.background,0,255)
         super().on_draw()
+
+
+class Create_phase(arcade.View):
+    def on_show(self):
+        arcade.set_background_color(arcade.color.GREEN)
+        self.background = arcade.load_texture(BG_CREATE_PHASE)
+        self.set_buttons()
+            
+    def set_buttons(self):
+        self.button_list.append(Button(self, Menu(), SCREEN_WIDTH/2 - 280,
+                                50, 160, 40, 'Voltar ao Menu', 15, 
+                                highlight=arcade.color.DARK_GRAY,
+                                shadow=arcade.color.DARK_LIVER))
+        self.eua_btn = Check_box(self, None,SCREEN_WIDTH/2 - 75, SCREEN_HEIGHT-450, 
+                                10, 10, color=arcade.color.WHITE,clicked=arcade.color.BLUE)
+        self.urss_btn = Check_box(self,self.eua_btn, SCREEN_WIDTH/2 + 75, SCREEN_HEIGHT-450, 
+                                10, 10, color=arcade.color.WHITE,clicked=arcade.color.RED)
+        self.eua_btn.other_checkbox = self.urss_btn
+        self.button_list.append(self.eua_btn)
+        self.button_list.append(self.urss_btn)
         
+    
+        self.button_list.append(Button(self, None, SCREEN_WIDTH/2,
+                            SCREEN_HEIGHT-250, 160, 50, 'Criar Missão',
+                            15))
+            
+        self.button_list.append(Button(self, None, SCREEN_WIDTH/2,
+                            SCREEN_HEIGHT-350, 160, 50, 'Criar Jornal',
+                            15))
         
+    def on_draw(self):
+        arcade.start_render()
+        arcade.draw_lrwh_rectangle_textured(0, 0,SCREEN_WIDTH, SCREEN_HEIGHT,
+                                            self.background,0,255)
+        arcade.draw_text("Criar Fase", SCREEN_WIDTH/2, SCREEN_HEIGHT/2+220,
+                         arcade.color.WHITE,50,align='center', anchor_x='center',
+                         anchor_y='center',font_name=CHERNOBYL_FONT)
+        arcade.draw_text("EUA", SCREEN_WIDTH/2 - 40, SCREEN_HEIGHT/2-150,
+                         arcade.color.WHITE,15,align='center', anchor_x='center',
+                         anchor_y='center',font_name=OLD_FONT1)
+        arcade.draw_text("URSS", SCREEN_WIDTH/2 + 40, SCREEN_HEIGHT/2-150,
+                         arcade.color.WHITE,15,align='center', anchor_x='center',
+                         anchor_y='center',font_name=OLD_FONT1)
+        
+        arcade.draw_text("Selecione um dos lados para criar uma missão/jornal", SCREEN_WIDTH/2, SCREEN_HEIGHT/2-180,
+                        arcade.color.WHITE,15,align='center', anchor_x='center',
+                        anchor_y='center',font_name=OLD_FONT1)
+        super().on_draw()
+        
+    def on_mouse_press(self, x, y, button, modifiers):
+        self.eua_btn.check_mouse_press(x,y)
+        self.urss_btn.check_mouse_press(x,y)
+        self.button_list[0].check_mouse_press(x,y)
+    
+        if self.eua_btn.pressed:
+            self.button_list[3].next_view = Create_mission("EUA")
+            self.button_list[4].next_view = Create_newspaper("EUA")
+            self.button_list[3].check_mouse_press(x,y)
+            self.button_list[4].check_mouse_press(x,y)
+        elif self.urss_btn.pressed:
+            self.button_list[3].next_view = Create_mission("URSS")
+            self.button_list[4].next_view = Create_newspaper("URSS")
+            self.button_list[3].check_mouse_press(x,y)
+            self.button_list[4].check_mouse_press(x,y)
+
+        
+class Create_mission(arcade.View):
+    def __init__(self,side):
+        super().__init__()
+        self.side = side
+        
+    def on_show(self):
+        arcade.set_background_color(arcade.color.GREEN)
+        self.background = arcade.load_texture(BG_CREATE_PHASE)
+        self.set_buttons()
+        
+    def set_buttons(self):
+        self.button_list.append(Button(self, Create_phase(), SCREEN_WIDTH/2 - 280,
+                                50, 160, 40, 'Voltar', 15, highlight=arcade.color.DARK_GRAY,
+                                shadow=arcade.color.DARK_LIVER))
+
+    def on_draw(self):
+        arcade.start_render()
+        arcade.draw_lrwh_rectangle_textured(0, 0,SCREEN_WIDTH, SCREEN_HEIGHT,
+                                            self.background,0,255)
+        arcade.draw_text("Criar Missão", SCREEN_WIDTH/2, SCREEN_HEIGHT/2+220,
+                         arcade.color.WHITE,50,align='center', anchor_x='center',
+                         anchor_y='center',font_name=CHERNOBYL_FONT)
+        super().on_draw()
+
+class Create_newspaper(arcade.View):
+    def __init__(self,side):
+        super().__init__()
+        self.side = side
+        
+    def on_show(self):
+        arcade.set_background_color(arcade.color.GREEN)
+        self.background = arcade.load_texture(BG_CREATE_PHASE)
+        self.set_buttons()
+        
+    def set_buttons(self):
+        self.button_list.append(Button(self, Create_phase(), SCREEN_WIDTH/2 - 280,
+                                50, 160, 40, 'Voltar', 15, highlight=arcade.color.DARK_GRAY,
+                                shadow=arcade.color.DARK_LIVER))
+
+    def on_draw(self):
+        arcade.start_render()
+        arcade.draw_lrwh_rectangle_textured(0, 0,SCREEN_WIDTH, SCREEN_HEIGHT,
+                                            self.background,0,255)
+        arcade.draw_text("Criar Jornal", SCREEN_WIDTH/2, SCREEN_HEIGHT/2+220,
+                         arcade.color.WHITE,50,align='center', anchor_x='center',
+                         anchor_y='center',font_name=CHERNOBYL_FONT)
+        super().on_draw()
+    
+    
 class Choose_side(arcade.View):
     def on_show(self):
         arcade.set_background_color(arcade.color.BLUE_SAPPHIRE)
