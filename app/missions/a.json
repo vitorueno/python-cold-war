@@ -1,9 +1,0 @@
-{
-    "title": "Missão A",
-    "text": "Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit.\nSuspendisse a nisl quis elit gravida\nfermentum et nec justo. Vestibulum\nvolutpat euismod dictum. Ut non\nmalesuada erat. Praesent lacinia\npellentesque semper. Integer lacus",
-    "btn_name1": "escolha A1",
-    "btn_name2": "escolha A2",
-    "destn1": null,
-    "destn2": null,
-    "newspaper": "news_test.json"
-}
