@@ -1,11 +1,12 @@
 import arcade
 import json
+import requests
 from .constants import *
 
 import arcade.gui
 from arcade.gui import UIFlatButton, UIManager
 from arcade.gui.ui_style import UIStyle
-        
+
         
 class Button(arcade.gui.UIFlatButton):
     def __init__(self, view, next_view, ui_manager, id,
@@ -146,12 +147,18 @@ class Choose_side(arcade.View):
         self.ui_manager.add_ui_element(menu_button)
 
     def set_mission_button(self):
-        self.ui_manager.purge_ui_elements()        
-        self.setup()
-        mission_button = Button(self, Mission('test.json'), self.ui_manager,
-                            'missao', SCREEN_WIDTH//2 + 280, 30, 160, 40,
-                            'Primeira missão', font_size=15)
-        self.ui_manager.add_ui_element(mission_button)
+        # self.ui_manager.purge_ui_elements()        
+        # self.setup()
+        btn_already_exist = self.ui_manager.find_by_id('missao')
+        if btn_already_exist:
+            btn_already_exist.next_view = Choose_Chapter(self.side) # updating destination
+            
+        else: # we must create it for the first time
+            mission_button = Button(self, Choose_Chapter(self.side), self.ui_manager,
+                                'missao', SCREEN_WIDTH//2 + 280, 30, 160, 40,
+                                'Primeira missão', font_size=15)
+            self.ui_manager.add_ui_element(mission_button)
+            
         
     def on_draw(self):
         arcade.start_render()
@@ -177,18 +184,66 @@ class Choose_side(arcade.View):
                 self.eua.collides_with_point(point):
                 self.side = 'URSS'
                 self.set_mission_button()
+            
+            
         super().on_mouse_press(_x,_y,_button,_modifiers)
     
     def on_hide_view(self):
         self.ui_manager.unregister_handlers()
-        
-        
-class Mission(arcade.View):
-    def __init__(self,file_name):
+
+class Choose_Chapter(arcade.View):
+    def __init__(self, side='EUA'):
         super().__init__()
         self.ui_manager = UIManager()
-        with open(f'{MISSIONS}/{file_name}', encoding='utf-8') as file:
-            self.mission = json.load(file)
+        self.side = side
+        
+    def on_show_view(self):
+        arcade.set_background_color(arcade.color.CYAN)
+        self.background = arcade.load_texture(BG_CHOOSE_CHAPTER)
+        self.setup()
+    
+    def setup(self):
+        go_back_button = Button(self, Choose_side(), self.ui_manager,'side', 
+                            SCREEN_WIDTH//2-280, 30, 160,40,
+                            'Voltar', font_size=15)
+        self.ui_manager.add_ui_element(go_back_button)
+        
+        request = requests.get(f'{BASE_URL}/chapters?side={self.side}')
+        chapters = request.json()
+        
+        for i in range(len(chapters)):
+            mission_id = ''
+            chapter_id = chapters[i]['id']
+            r_chapter_missions = requests.get(f'{BASE_URL}/missions?chapterId={chapter_id}')
+            chapter_missions = r_chapter_missions.json()
+            for mission in chapter_missions:
+                if mission['first_mission'] == 1:
+                    mission_id = mission['id']
+                
+            button = Button(self, Mission(mission_id), self.ui_manager,
+                            chapters[i]['id'], SCREEN_WIDTH//2,
+                            SCREEN_HEIGHT - (i * 40) - 100 , 200, 30,
+                            chapters[i]['name'], font_size=15) 
+            self.ui_manager.add_ui_element(button)
+        
+    def on_draw(self):
+        arcade.start_render()
+        arcade.draw_lrwh_rectangle_textured(0, 0,SCREEN_WIDTH, SCREEN_HEIGHT,
+                                            self.background,0,255)
+        arcade.draw_text(f'Escolha de capítulo: {self.side}',SCREEN_WIDTH//2, 
+                        SCREEN_HEIGHT-50,arcade.color.WHITE,25, align='center',
+                        anchor_x='center', font_name=CHERNOBYL_FONT)
+        
+    def on_hide_view(self):
+        self.ui_manager.unregister_handlers()
+    
+        
+class Mission(arcade.View):
+    def __init__(self, id):
+        super().__init__()
+        self.ui_manager = UIManager()
+        request = requests.get(f'{BASE_URL}/missions/{id}')
+        self.mission = request.json()
         
     def on_show(self):
         arcade.set_background_color(arcade.color.WHITE)
@@ -196,46 +251,67 @@ class Mission(arcade.View):
         self.setup()
         
     def setup(self):
-        if self.mission['destn1'] is not None:
-            next_view1 = Mission(self.mission['destn1']) 
-        else:
-            next_view1 = Newspaper(self.mission['newspaper'])
-        if self.mission['destn2'] is not None:
-            next_view2 = Mission(self.mission['destn2']) 
-        else:
-            next_view2 = Newspaper(self.mission['newspaper'])
+        next_view = None
+        href_btn_1 = self.mission['href_button_1']
+        href_btn_2 = self.mission['href_button_2']
         
-        choose_button_1 = Button(self, next_view1, self.ui_manager, 'choose_1', 
-                                 SCREEN_WIDTH//2 - 280, 40, 160, 40, 
-                                 self.mission['btn_name1'])
-        self.ui_manager.add_ui_element(choose_button_1)
+
+        #button 1
+        if 'm' in href_btn_1:
+            next_view = Mission(href_btn_1[2:])
+        elif 'n' in href_btn_1:
+            next_view = Newspaper(href_btn_1[2:])
+        # elif 'r' in href_btn_1:
+        #     next_view = Report(href_btn_1[2:])
         
-        choose_button_2 = Button(self, next_view2, self.ui_manager, 'choose_2',
-                                  SCREEN_WIDTH//2 + 280, 40, 160, 40, 
-                                  self.mission['btn_name2'])
-        self.ui_manager.add_ui_element(choose_button_2)
+        #button 2
+        if 'm' in href_btn_2:
+            next_view = Mission(href_btn_2[2:])
+        elif 'n' in href_btn_2:
+            next_view = Newspaper(href_btn_2[2:])
+        # elif 'r' in href_btn_2:
+        #     next_view = Report(href_btn_2[2:])
+        
+        txt_btn_1 = self.mission['text_button_1']
+        button_1 = Button(self, next_view, self.ui_manager, 'btn_1',
+                        SCREEN_WIDTH//2 - 280, 40, 160, 40, txt_btn_1, font_size=15)
+        self.ui_manager.add_ui_element(button_1)
+        
+        txt_btn_2 = self.mission['text_button_2']
+        button_2 = Button(self, next_view, self.ui_manager, 'btn_2',
+                        SCREEN_WIDTH//2 + 280, 40, 160, 40, txt_btn_2, font_size=15)
+        self.ui_manager.add_ui_element(button_2)
         
     def on_draw(self):
         arcade.start_render()
         arcade.draw_text(self.mission['title'], 520, 510,
                          arcade.color.BLACK, font_size=40,
                          anchor_x='center',font_name=OLD_FONT2)
-        arcade.draw_text(self.mission['text'], SCREEN_WIDTH/2, SCREEN_HEIGHT/2-150,
-                         arcade.color.BLACK, 25,align='center', anchor_x='center',
-                         font_name=OLD_FONT2)
-        arcade.draw_lrwh_rectangle_textured(14, 475,247, 116,
-                                            self.top_secret,0,255)
+        
+        text = self.mission['description']
+        parsed_text = self.break_lines(text)
+        
+        arcade.draw_text(parsed_text, SCREEN_WIDTH//2, SCREEN_HEIGHT//2 - 20,
+                         arcade.color.BLACK, 25, align='center', anchor_x='center', 
+                         anchor_y='center', font_name=OLD_FONT2)
+        arcade.draw_lrwh_rectangle_textured(14, 475,247, 116, self.top_secret,0,255)
 
     def on_hide_view(self):
         self.ui_manager.unregister_handlers()
         
-            
+    def break_lines(self, text, max_length=35):
+        chunks = [text[i:i+max_length] for i in range(0, len(text), max_length)]
+        parsed_text = ''
+        for chunk in chunks:
+            parsed_text += chunk + '\n' 
+        return parsed_text
+
 class Newspaper(arcade.View):
-    def __init__(self,file_name):
+    def __init__(self, id):
         super().__init__()
         self.ui_manager = UIManager()
-        with open(f'{NEWSPAPER}/{file_name}',encoding='utf-8') as file:
-            self.newspaper = json.load(file)
+        request = requests.get(f'{BASE_URL}/newspapers/{id}')
+        self.newspaper = request.json()
             
     def on_show(self):
         arcade.set_background_color(arcade.color.GRAY_BLUE)
@@ -245,21 +321,31 @@ class Newspaper(arcade.View):
         
     def setup(self):
         menu_button = Button(self, Menu(), self.ui_manager, 'menu_end_game',
-                              616,40, 160, 40, 'Voltar ao Menu', font_size=15)
+                              616, 40, 160, 40, 'Voltar ao Menu', font_size=15)
         self.ui_manager.add_ui_element(menu_button)
         
     def on_draw(self):
         arcade.start_render()
         arcade.draw_lrwh_rectangle_textured(0, 0,SCREEN_WIDTH, SCREEN_HEIGHT,
                                             self.background,0,255)
-        arcade.draw_text(self.newspaper['news_title'], 400, 419, arcade.color.BLACK,
+        arcade.draw_text(self.newspaper['headline'], 400, 419, arcade.color.BLACK,
                         font_size=45, anchor_x='center',font_name=OLD_FONT1)
-        arcade.draw_text(self.newspaper['news_subtitle'], 220 , 337,arcade.color.BLACK,
+        arcade.draw_text(self.newspaper['subtitle'], 220 , 337,arcade.color.BLACK,
                         font_size=20, anchor_x='center',font_name=OLD_FONT1)
-        arcade.draw_text(self.newspaper['news_text'], 235, 273,arcade.color.GRAY,
+        
+        text = self.newspaper['text']
+        parsed_text = self.break_lines(LOREM, 35)
+        arcade.draw_text(parsed_text, 235, 273,arcade.color.GRAY,
                         font_size=14, anchor_x='center',anchor_y='top',
                         font_name=OLD_FONT2)
         self.astronaut.draw()
 
     def on_hide_view(self):
         self.ui_manager.unregister_handlers()
+        
+    def break_lines(self, text, max_length=35):
+        chunks = [text[i:i+max_length] for i in range(0, len(text), max_length)]
+        parsed_text = ''
+        for chunk in chunks:
+            parsed_text += chunk + '\n' 
+        return parsed_text
