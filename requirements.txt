@@ -10,6 +10,6 @@ pycparser==2.20
 pyglet==1.5.7
 pymunk==5.7.0
 pytiled-parser==0.9.4a3
-PyYAML==5.3.1
+PyYAML==5.4
 requests==2.24.0
 urllib3==1.25.10
